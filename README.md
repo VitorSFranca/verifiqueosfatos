@@ -6,7 +6,7 @@ Instância produtiva em: https://verifiqueosfatos.com/
 
 ## Arquitetura e Fluxo
 
-Esta aplicação é uma `PWA (Progressive Web Page)` estática feita em vanilla `HTML/CSS/JS` com `Auto Update` sem necessidade de backend dedidcado, os arquivos devem ser servidos preferencialmente de maneira serverless. Recomenda-se uma CDN. Não há "backend", você só precisa de um host. Nesta Doc Section você entenderá o que acontece assim que um usuário acessa esta app, seja em modo local ou produtivo.
+Esta aplicação é uma `PWA (Progressive Web App)` estática feita em vanilla `HTML/CSS/JS` com `Auto Update` sem necessidade de backend dedidcado, os arquivos devem ser servidos preferencialmente de maneira serverless. Recomenda-se uma CDN. Não há "backend", você só precisa de um host. Nesta Doc Section você entenderá o que acontece assim que um usuário acessa esta app, seja em modo local ou produtivo.
 
 🟦 A index.html será carregada
 
@@ -28,7 +28,7 @@ Caso post.json tenha sido obtido com sucesso a página comparará os itens atuai
 
 Após este processo a função de rendering é chamada e o front reage, nessa fase é onde a página é de fato percebida pelo user.
 
-## PWA (Progresstive Web Web)
+## PWA (Progresstive Web App)
 
 Um PWA (Progressive Web App ou Aplicativo Web Progressivo) é uma aplicação criada com tecnologias web tradicionais (HTML, CSS e JavaScript) que oferece uma experiência de uso semelhante à de um aplicativo nativo de celular ou computador. 
 
@@ -70,7 +70,8 @@ Este arquivo deve servir um Array de objetos com a seguinte estrutura:
     "n": 1,
     "c": 1,
     "t": "Aqui estará a declaração feita pelo candidato descrita o mais fielmente possível",
-    "v": "Aqui estará a verificação feita, com fontes e referências."
+    "v": "Aqui estará a verificação feita, com fontes e referências.",
+    "s": ["https://www.ibge.gov.br/", "https://www.bcb.gov.br/"]
   }
 ]
 ```
@@ -82,6 +83,7 @@ Onde:
 - `"c"` é o check status, 1 para Verdadeiro, 2 para Falso e 3 para Parcial
 - `"t"` é o `text`, basicamente a declaração feita pelo candidato
 - `"v"` é a verificação, ou seja: o texto de demonstrando o que foi verificado
+- `"s"` (opcional) são as fontes: um array de URLs http(s), exibidas no card como links com o domínio de cada uma, sempre abertos em nova aba
 ```
 
 Cada objeto no array seguindo essa estrutura será renderizado como um card contendo foto e as informações checadas. Caso posts.json falhe ou seja inválido a página falhará silenciosamente e manterá o estado atual válido. Este objeto é configurado assim pra que possa ser distribuído com custo mínimo. Você pode mudar imagens e os labels editando a index.html. 
