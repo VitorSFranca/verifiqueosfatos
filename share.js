@@ -20,13 +20,13 @@
             <button type="button" class="sh-opt" data-dark="1" aria-pressed="false">Escuro</button>
           </div>
           <div class="sh-actions">
-            <button type="button" class="sh-btn sh-main" data-act="download">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 21h14"/></svg>
-              Baixar imagem
+            <button type="button" class="sh-btn sh-main" data-act="share-image">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+              Compartilhar imagem
             </button>
-            <button type="button" class="sh-btn" data-act="share" hidden>
+            <button type="button" class="sh-btn" data-act="share">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
-              Compartilhar
+              <span>Compartilhar link</span>
             </button>
             <button type="button" class="sh-btn" data-act="copy" hidden>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
@@ -57,7 +57,7 @@
   const ctx = canvas.getContext('2d');
   const shareButton = dialog.querySelector('[data-act=share]');
   const copyButton = dialog.querySelector('[data-act=copy]');
-  let opener, card, dark, photo, blob;
+  let opener, card, dark, photo, blob, canShareImage;
 
   // Same logo as the page header
   const logo = new Image();
@@ -65,7 +65,7 @@
   logo.decode().then(() => card && draw(), () => {});
 
   try {
-    shareButton.hidden = !navigator.canShare({ files: [new File([''], 'a.png', { type: 'image/png' })] });
+    canShareImage = navigator.canShare({ files: [new File([''], 'a.png', { type: 'image/png' })] });
   } catch {}
   copyButton.hidden = !self.ClipboardItem;
 
@@ -214,7 +214,7 @@
     ctx.fillStyle = t.muted;
     ctx.fillText('verifiqueosfatos.com', R, rowY + 35);
 
-    // Ready ahead of time so "Compartilhar" keeps the click's user activation
+    // Ready ahead of time so "Compartilhar imagem" keeps the click's user activation
     canvas.toBlob(b => blob = b, 'image/png');
   }
 
@@ -224,19 +224,30 @@
     return `checagem-${slug(card.querySelector('h2').textContent)}-${slug(card.querySelector('.badge').textContent)}.png`;
   }
 
-  function download() {
-    canvas.toBlob(b => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = fileName();
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-    }, 'image/png');
+  // Image only, so it can be posted as a story; downloads it where files can't be shared
+  function shareImage() {
+    if (!blob) return;
+    if (canShareImage) return navigator.share({ files: [new File([blob], fileName(), { type: 'image/png' })] }).catch(() => {});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName();
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
   }
 
-  function share() {
-    if (!blob) return;
-    navigator.share({ files: [new File([blob], fileName(), { type: 'image/png' })] }).catch(() => {});
+  // Shares the link to the card; without the Web Share API, copies it instead
+  async function share() {
+    const name = card.querySelector('h2').textContent;
+    const title = `Veja se ${name} falou a verdade`;
+    const text = `${name} disse que: "${card.querySelector('.said').textContent.trim()}"\n\nSerá que é verdade? Veja a checagem:`;
+    const url = `${location.origin}/#${card.id}`;
+    if (navigator.share) return navigator.share({ title, text, url }).catch(() => {});
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      const label = shareButton.querySelector('span');
+      label.textContent = 'Copiado!';
+      setTimeout(() => label.textContent = 'Compartilhar link', 2000);
+    } catch {}
   }
 
   // Safari only keeps the click's user activation if the ClipboardItem gets a promise
@@ -283,7 +294,7 @@
     if (!b) return;
     if (b.classList.contains('sh-close')) dialog.close();
     else if (b.dataset.dark) setLook(b.dataset.dark === '1');
-    else if (b.dataset.act === 'download') download();
+    else if (b.dataset.act === 'share-image') shareImage();
     else if (b.dataset.act === 'share') share();
     else if (b.dataset.act === 'copy') copy();
   });
