@@ -313,6 +313,12 @@ main.loading:empty::after {
   margin-top: 22px;
 }
 
+.fix {
+  padding: 10px 12px;
+  background: var(--soft);
+  border-left: 3px solid var(--line2);
+}
+
 .sources {
   display: flex;
   flex-wrap: wrap;

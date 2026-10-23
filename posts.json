@@ -1,11 +1,13 @@
 [
   {
+    "id": 1,
     "n": 1,
     "c": 1,
     "t": "Aqui estará a declaração feita pelo candidato descrita o mais fielmente possível",
     "v": "Aqui estará a verificação feita, com fontes e referências."
   },
   {
+    "id": 2,
     "n": 2,
     "c": 1,
     "t": "Aqui estará a declaração feita pelo candidato descrita o mais fielmente possível",

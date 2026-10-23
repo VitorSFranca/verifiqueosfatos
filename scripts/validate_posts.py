@@ -42,11 +42,20 @@ def validate(path: Path) -> list[str]:
         return [f"{path}: top-level value must be an array"]
 
     errors: list[str] = []
+    seen_ids: set[int] = set()
     for index, post in enumerate(posts):
         location = f"{path}[{index}]"
         if not isinstance(post, dict):
             errors.append(f"{location}: each post must be an object")
             continue
+
+        post_id = post.get("id")
+        if type(post_id) is not int or post_id < 1:
+            errors.append(f"{location}.id: expected a positive integer")
+        elif post_id in seen_ids:
+            errors.append(f"{location}.id: {post_id} is already used by another post")
+        else:
+            seen_ids.add(post_id)
 
         candidate = post.get("n")
         if type(candidate) is not int or candidate not in VALID_CANDIDATES:
@@ -59,6 +68,10 @@ def validate(path: Path) -> list[str]:
         for field in ("t", "v"):
             if not isinstance(post.get(field), str):
                 errors.append(f"{location}.{field}: expected a string")
+
+        if "e" in post:
+            if not isinstance(post["e"], str) or not post["e"].strip():
+                errors.append(f"{location}.e: expected a non-empty string")
 
         if "s" in post:
             sources = post["s"]
