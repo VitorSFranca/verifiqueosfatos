@@ -104,6 +104,46 @@ h1 {
   color: var(--muted);
 }
 
+/* Search */
+.search {
+  position: relative;
+  margin-bottom: 20px;
+  color: var(--muted);
+}
+
+.search svg {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 44px;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: 99px;
+  color: var(--ink);
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search input::placeholder {
+  color: var(--muted);
+}
+
+.no-results {
+  color: var(--muted);
+}
+
+.card[hidden] {
+  display: none;
+}
+
 main:empty::after {
   content: 'Nada por aqui ainda... verifique novamente daqui alguns minutos.';
   color: var(--muted);

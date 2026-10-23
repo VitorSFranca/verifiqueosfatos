@@ -52,7 +52,13 @@
       </button>
     </header>
 
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" id="q" placeholder="Buscar nas checagens" aria-label="Buscar nas checagens" autocomplete="off" enterkeyhint="search">
+    </div>
+
     <main></main>
+    <p class="no-results" role="status" hidden>Nenhuma checagem encontrada.</p>
 
     <footer class="foot">
       <p>Um projeto feito pela comunidade para a comunidade.</p>
@@ -90,9 +96,15 @@
       }
     }
 
+    // Lowercase and strip accents so "flavio" matches "Flávio"
+    function normalize(str) {
+      return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
     function createCardHTML(item) {
+      const haystack = normalize([labels.n[item.n], labels.c[item.c], item.t, item.v].join(' '));
       return `
-        <article class="card">
+        <article class="card" data-s="${escapeHTML(haystack)}">
           <header>
             <img src="/${labels.i[item.n]}" alt="" width="56" height="56" decoding="async" loading="lazy">
             <h2>${labels.n[item.n]}</h2>
@@ -153,7 +165,22 @@
 
       // Update in-memory reference
       currentPosts = items;
-      
+      applyFilter();
+    }
+
+    // Hides the cards that don't match every word typed in the search box
+    function applyFilter() {
+      const terms = normalize(searchInput.value).split(/\s+/).filter(Boolean);
+      const cards = document.querySelectorAll('.card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const match = terms.every(term => card.dataset.s.includes(term));
+        card.hidden = !match;
+        if (match) visible++;
+      });
+
+      noResults.hidden = !cards.length || visible > 0;
     }
 
     function escapeHTML(str) {
@@ -193,6 +220,10 @@
         })
         .catch(console.error);
     }
+
+    const searchInput = document.getElementById('q');
+    const noResults = document.querySelector('.no-results');
+    searchInput.addEventListener('input', applyFilter);
 
     const themeButton = document.querySelector('.theme');
     themeButton.setAttribute('aria-pressed', document.documentElement.dataset.theme === 'dark');
