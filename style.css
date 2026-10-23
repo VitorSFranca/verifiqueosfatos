@@ -132,6 +132,10 @@ h1 {
   appearance: none;
 }
 
+.search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 .search input::placeholder {
   color: var(--muted);
 }
